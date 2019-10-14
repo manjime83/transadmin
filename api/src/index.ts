@@ -1,26 +1,31 @@
-import express from "express";
+import "reflect-metadata";
+import { ApolloServer } from "apollo-server";
+import { Resolver, Query, buildSchema } from "type-graphql";
 
-const app = express();
-
-app.listen(8000, () => {
-  console.log("Server running on 8000 with auto restart!");
-});
-
-function myname(a: number): void {
-  function myname2(a: number): number {
-    return a;
+@Resolver()
+class HelloResolver {
+  @Query(() => String, { description: "Hola Mundo" })
+  async hello(): Promise<number> {
+    return await this.numberOne();
   }
 
-  myname2(a);
+  async numberOne(): Promise<number> {
+    return Promise.resolve(1);
+  }
 }
 
-function hola(): string {
-  myname(2);
+const bootstrap = async (): Promise<void> => {
+  const schema = await buildSchema({ resolvers: [HelloResolver] });
+  const apolloServer = new ApolloServer({
+    schema,
+    playground: process.env.NODE_ENV !== "production"
+  });
 
-  return "omg" + "cap";
-}
+  apolloServer.listen().then(({ url, subscriptionsPath }) => {
+    console.log(
+      `Server ready at ${url.concat(subscriptionsPath.substring(1))}`
+    );
+  });
+};
 
-app.get("/", (req, res) => {
-  res.send("Awesome! We're live debugging this!");
-  hola();
-});
+bootstrap();

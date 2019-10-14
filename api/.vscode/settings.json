@@ -17,5 +17,9 @@
             "language": "typescript"
         }
     ],
-    "eslint.packageManager": "yarn"
+    "eslint.packageManager": "yarn",
+    "editor.rulers": [
+        80
+    ],
+    "editor.snippetSuggestions": "none"
 }
