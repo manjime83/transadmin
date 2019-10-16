@@ -1,24 +1,15 @@
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server";
-import { Resolver, Query, buildSchema } from "type-graphql";
-
-@Resolver()
-class HelloResolver {
-  @Query(() => String, { description: "Hola Mundo" })
-  async hello(): Promise<number> {
-    return await this.numberOne();
-  }
-
-  async numberOne(): Promise<number> {
-    return Promise.resolve(1);
-  }
-}
+import { buildSchema } from "type-graphql";
+import { createConnection } from "typeorm";
+import { HelloResolver } from "./modules/user/Register";
 
 const bootstrap = async (): Promise<void> => {
+  await createConnection();
+
   const schema = await buildSchema({ resolvers: [HelloResolver] });
   const apolloServer = new ApolloServer({
-    schema,
-    playground: process.env.NODE_ENV !== "production"
+    schema
   });
 
   apolloServer.listen().then(({ url, subscriptionsPath }) => {
