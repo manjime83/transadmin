@@ -1,0 +1,62 @@
+{
+  "name": "api.transadmin.co",
+  "version": "0.0.1",
+  "description": "transadmin.co api server",
+  "main": "src/server.ts",
+  "repository": "https://github.com/manjime83/transadmin",
+  "author": "Manuel Jiménez",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/server.ts",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "dev:debug": "ts-node-dev --inspect --respawn src/server.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
+  },
+  "dependencies": {
+    "@typegoose/typegoose": "^6.0.4",
+    "apollo-server": "^2.9.6",
+    "graphql": "^14.5.8",
+    "mongoose": "^5.7.5",
+    "reflect-metadata": "^0.1.13",
+    "type-graphql": "^0.17.5"
+  },
+  "devDependencies": {
+    "@types/graphql": "^14.5.0",
+    "@types/mongoose": "^5.5.21",
+    "@types/node": "^12.11.1",
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
+    "eslint": "^6.5.1",
+    "eslint-config-prettier": "^6.4.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "prettier": "^1.18.2",
+    "ts-node": "^8.4.1",
+    "ts-node-dev": "^1.0.0-pre.43",
+    "typescript": "^3.6.4"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:prettier/recommended",
+      "prettier/@typescript-eslint"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module",
+      "project": "tsconfig.json"
+    },
+    "env": {
+      "node": true
+    },
+    "rules": {}
+  },
+  "prettier": {
+    "printWidth": 120
+  }
+}
