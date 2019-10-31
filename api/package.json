@@ -2,42 +2,66 @@
   "name": "api.transadmin.co",
   "version": "0.0.1",
   "private": true,
-  "description": "transadmin.co",
-  "main": "src/index.ts",
-  "license": "MIT",
+  "description": "transadmin.co api server",
+  "main": "src/server.ts",
+  "license": "UNLICENSED",
   "repository": {
     "type": "git",
     "url": "git://github.com/manjime/transadmin.co.git"
   },
-  "scripts": {
-    "start": "ts-node src/index.ts",
-    "dev": "nodemon --exec ts-node src/index.ts",
-    "build": "tsc",
-    "lint:fix": "eslint --fix src/**/*.ts"
-  },
   "author": "Manuel Jiménez",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/server.ts",
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "dev:debug": "ts-node-dev --inspect --respawn src/server.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix"
+  },
   "dependencies": {
-    "apollo-server": "^2.9.6",
+    "apollo-server": "^2.9.7",
     "bcrypt": "^3.0.6",
     "graphql": "^14.5.8",
-    "mongodb": "^3.3.2",
+    "jsonwebtoken": "^8.5.1",
     "reflect-metadata": "^0.1.13",
-    "type-graphql": "^0.17.5",
-    "typeorm": "^0.2.19"
+    "tslib": "^1.10.0",
+    "type-graphql": "^0.17.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
     "@types/graphql": "^14.5.0",
-    "@types/mongodb": "^3.3.6",
-    "@types/node": "^12.7.12",
-    "@typescript-eslint/eslint-plugin": "^2.3.3",
-    "@typescript-eslint/parser": "^2.3.3",
+    "@types/jsonwebtoken": "^8.3.5",
+    "@types/node": "^12.11.1",
+    "@typescript-eslint/eslint-plugin": "^2.4.0",
+    "@typescript-eslint/parser": "^2.4.0",
     "eslint": "^6.5.1",
     "eslint-config-prettier": "^6.4.0",
     "eslint-plugin-prettier": "^3.1.1",
-    "nodemon": "^1.19.3",
     "prettier": "^1.18.2",
     "ts-node": "^8.4.1",
+    "ts-node-dev": "^1.0.0-pre.43",
     "typescript": "^3.6.4"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:prettier/recommended",
+      "prettier/@typescript-eslint"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "module",
+      "project": "tsconfig.json"
+    },
+    "env": {
+      "node": true
+    },
+    "rules": {}
+  },
+  "prettier": {
+    "printWidth": 120
   }
 }

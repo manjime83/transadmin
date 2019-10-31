@@ -1,9 +1,8 @@
 {
     "type": "mongodb",
-    "url": "mongodb+srv://admin:tfE0gL3OwLSJK5zi@cluster-zero-npfpe.mongodb.net?retryWrites=true&w=majority",
+    "url": "mongodb+srv://admin:tfE0gL3OwLSJK5zi@cluster-zero-npfpe.mongodb.net/transadmin-test?retryWrites=true&w=majority",
     "useNewUrlParser": true,
     "useUnifiedTopology": true,
-    "database": "transadmin-test",
     "synchronize": true,
     "logging": true,
     "entities": [

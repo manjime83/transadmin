@@ -1,4 +1,15 @@
 {
+    "eslint.autoFixOnSave": true,
+    "eslint.validate": [
+        {
+            "language": "javascript",
+            "autoFix": true
+        },
+        {
+            "language": "typescript",
+            "autoFix": true
+        }
+    ],
     "editor.formatOnSave": true,
     "[javascript]": {
         "editor.formatOnSave": false,
@@ -6,21 +17,11 @@
     "[typescript]": {
         "editor.formatOnSave": false,
     },
-    "eslint.autoFixOnSave": true,
-    "eslint.validate": [
-        {
-            "autoFix": true,
-            "language": "javascript"
-        },
-        {
-            "autoFix": true,
-            "language": "typescript"
-        }
-    ],
-    "eslint.packageManager": "yarn",
+    "editor.tabSize": 2,
     "editor.rulers": [
-        80
+        120
     ],
     "editor.snippetSuggestions": "none",
+    "eslint.packageManager": "yarn",
     "explorer.autoReveal": false
 }
