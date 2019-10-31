@@ -1,3 +1,4 @@
+import "dotenv/config";
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
@@ -7,24 +8,20 @@ import jwt from "jsonwebtoken";
 
 async function bootstrap(): Promise<void> {
   try {
-    // await mongoose.connect(
-    //   "mongodb+srv://admin:tfE0gL3OwLSJK5zi@cluster-zero-npfpe.mongodb.net/transadmin-test?retryWrites=true&w=majority",
-    //   { useNewUrlParser: true, useUnifiedTopology: true }
-    // );
-
     const schema = await buildSchema({
       resolvers: [__dirname + "/resolvers/**/*.ts"],
       authChecker: ({ context }, roles) => {
         return roles.includes(context.user.role);
       }
     });
+
     const server = new ApolloServer({
       schema,
       context: ({ req }): Context => {
         const token = (req.headers.authorization || "").split(" ")[1];
         try {
-          return { user: jwt.verify(token, process.env.JWT_SECRET || "secret") };
-        } catch (e) {
+          return { user: jwt.verify(token, process.env.JWT_SECRET || "s3cret") };
+        } catch (error) {
           return { user: undefined };
         }
       },

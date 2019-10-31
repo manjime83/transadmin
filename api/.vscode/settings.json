@@ -10,6 +10,7 @@
             "autoFix": true
         }
     ],
+    "eslint.packageManager": "yarn",
     "editor.formatOnSave": true,
     "[javascript]": {
         "editor.formatOnSave": false,
@@ -22,6 +23,5 @@
         120
     ],
     "editor.snippetSuggestions": "none",
-    "eslint.packageManager": "yarn",
     "explorer.autoReveal": false
 }
