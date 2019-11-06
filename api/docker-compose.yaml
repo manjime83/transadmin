@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  postgres:
+    image: postgres:10
+    environment:
+      - POSTGRES_USER=transadmin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=transadmin
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    user: "1000:1000"
+    ports:
+      - 5432:5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: man.jime@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    ports:
+      - 8080:80
+    volumes:
+      - ./pgadmin:/root/.pgadmin

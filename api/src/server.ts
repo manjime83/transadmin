@@ -1,5 +1,6 @@
 import "dotenv/config";
 import "reflect-metadata";
+import { createConnection } from "typeorm";
 import { ApolloServer } from "apollo-server";
 import { buildSchema } from "type-graphql";
 import { Context } from "apollo-server-core";
@@ -7,6 +8,8 @@ import jwt from "jsonwebtoken";
 // import mongoose from "mongoose";
 
 async function bootstrap(): Promise<void> {
+  createConnection();
+
   try {
     const schema = await buildSchema({
       resolvers: [__dirname + "/resolvers/**/*.ts"],
@@ -25,7 +28,8 @@ async function bootstrap(): Promise<void> {
           return { user: undefined };
         }
       },
-      cors: true
+      cors: true,
+      debug: false
     });
 
     server.listen({ port: 4000 }, () => {
