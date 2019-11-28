@@ -2,21 +2,25 @@ import { Resolver, Mutation, Query, Arg, InputType, Field } from "type-graphql";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../entities/User";
-import { validate } from "class-validator";
-import { ApolloError, UserInputError } from "apollo-server";
+import { IsEmail, IsNotEmpty } from "class-validator";
+import { ApolloError } from 'apollo-server-errors';
 
 @InputType()
 export class UserData {
   @Field()
+  @IsEmail()
   email: string;
 
   @Field()
+  @IsNotEmpty()
   password: string;
 
   @Field()
+  @IsNotEmpty()
   firstName: string;
 
   @Field()
+  @IsNotEmpty()
   lastName: string;
 }
 
@@ -29,25 +33,27 @@ export default class UserResolver {
     const encryptedPassword = await bcrypt.hash(password, 13);
     const user = User.create({ email, password: encryptedPassword, firstName, lastName });
 
-    const errors = await validate(user);
-    if (errors.length > 0) {
-      throw new UserInputError("Object validation error", {
-        invalidArgs: errors.reduce(
-          (result, { property, constraints }) => {
-            result[property] = Object.values(constraints).join(", ");
-            return result;
-          },
-          {} as Record<string, string>
-        )
-      });
-    }
+    // const errors = await validate(user);
+    // if (errors.length > 0) {
+    //   throw new UserInputError("Object validation error", {
+    //     invalidArgs: errors.reduce(
+    //       (result, { property, constraints }) => {
+    //         result[property] = Object.values(constraints).join(", ");
+    //         return result;
+    //       },
+    //       {} as Record<string, string>
+    //     )
+    //   });
+    // }
 
     const count = await User.count({ email });
     if (count > 0) {
       throw new ApolloError("El usuario ya existe");
     }
 
-    return await user.save();
+    return await User.insert(user).then(() => {
+      return user;
+    });
   }
 
   @Query(() => String)
