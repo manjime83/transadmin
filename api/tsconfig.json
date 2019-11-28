@@ -11,7 +11,7 @@
     "removeComments": true,
     "importHelpers": true,
     "strict": true,
-    "strictPropertyInitialization": false, // disable initializaion
+    "strictPropertyInitialization": false, // disable initialization
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
