@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  EnvType:
+    Type: String
+    AllowedValues: 
+      - prod
+      - test
+
+Conditions: 
+  IsProd: !Equals [!Ref EnvType, prod]
+
+Resources:
+  vpc:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        EnvType: !Ref EnvType
+      TemplateURL: stacks/vpc.yaml
+
+  dns:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      Parameters:
+        EnvType: !Ref EnvType
+      TemplateURL: stacks/dns.yaml
+
+Outputs:
+  VpcId:
+    Value: !GetAtt vpc.Outputs.VpcId
+  SubnetIds:
+    Value: !GetAtt vpc.Outputs.SubnetIds
+  HostedZoneId:
+    Value: !GetAtt dns.Outputs.HostedZoneId

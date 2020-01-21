@@ -1,0 +1,35 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  EnvType:
+    Type: String
+    AllowedValues:
+      - prod
+      - test
+
+Conditions:
+  IsProd: !Equals [!Ref EnvType, prod]
+  IsTest: !Equals [!Ref EnvType, test]
+
+Resources:
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !If [IsProd, transadmin.co, test.transadmin.co]
+
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    Condition: IsTest
+    Properties:
+      HostedZoneId:
+        Fn::ImportValue: !Join ["-", [transadmin, prod, hosted, zone, id]]
+      Name: test.transadmin.co
+      Type: NS
+      TTL: "172800"
+      ResourceRecords: !GetAtt HostedZone.NameServers
+
+Outputs:
+  HostedZoneId:
+    Value: !Ref HostedZone
+    Export:
+      Name: !Join ["-", [transadmin, !Ref EnvType, hosted, zone, id]]
