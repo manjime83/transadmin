@@ -7,9 +7,6 @@ Parameters:
       - prod
       - test
 
-Conditions: 
-  IsProd: !Equals [!Ref EnvType, prod]
-
 Resources:
   vpc:
     Type: AWS::CloudFormation::Stack
