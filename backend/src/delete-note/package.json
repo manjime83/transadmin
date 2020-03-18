@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "license": "UNLICENSED",
   "scripts": {
-    "prepack": "tsc",
+    "prepack": "npm install && tsc",
     "postpack": "bash ../../scripts/postpack.sh",
     "update-lambda-code": "aws lambda update-function-code --function-name $NAME-$NODE_ENV --zip-file fileb://../../dist/$NAME.zip"
   },
