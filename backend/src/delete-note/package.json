@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "name": "@transadmin/delete-note",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "scripts": {
+    "prepack": "tsc",
+    "postpack": "cd ../../dist && rm -rf transadmin-delete-note-1.0.0.zip package && tar -xzf ../src/delete-note/transadmin-delete-note-1.0.0.tgz && rm ../src/delete-note/transadmin-delete-note-1.0.0.tgz && cd package && zip -qr ../transadmin-delete-note-1.0.0.zip .",
+    "update-code": "aws lambda update-function-code --function-name $(basename $PWD) --zip-file fileb://../../lambda/$(basename $PWD).zip"
+  },
+  "dependencies": {
+    "tslib": "^1.11.1"
+  },
+  "bundleDependencies": [
+    "tslib"
+  ],
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.46",
+    "@types/node": "^13.9.1",
+    "aws-sdk": "^2.641.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "incremental": false,
+    "target": "es2019",
+    "module": "commonjs",
+    "lib": [
+      "es2019",
+      "dom"
+    ],
+    "declaration": false,
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "inlineSourceMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "importHelpers": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
