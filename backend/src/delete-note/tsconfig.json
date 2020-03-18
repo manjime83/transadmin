@@ -8,14 +8,17 @@
       "dom"
     ],
     "declaration": false,
+    "sourceMap": true,
     "strict": true,
     "allowSyntheticDefaultImports": true,
-    "inlineSourceMap": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "importHelpers": true,
     "forceConsistentCasingInFileNames": true
-  }
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }
