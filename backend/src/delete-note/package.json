@@ -6,7 +6,7 @@
   "scripts": {
     "prepack": "npm install && tsc",
     "postpack": "bash ../../scripts/postpack.sh",
-    "update-lambda-code": "aws lambda update-function-code --function-name $NAME-$NODE_ENV --zip-file fileb://../../dist/$NAME.zip"
+    "deploy": "bash ../../scripts/update-function-code.sh"
   },
   "dependencies": {
     "tslib": "^1.11.1"
