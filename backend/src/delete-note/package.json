@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "license": "UNLICENSED",
   "scripts": {
-    "prepack": "npm install && tsc",
+    "prepack": "npm update --dev && npm install && tsc",
     "postpack": "bash ../../scripts/postpack.sh",
     "deploy": "bash ../../scripts/update-function-code.sh"
   },
