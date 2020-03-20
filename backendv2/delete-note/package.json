@@ -1,0 +1,22 @@
+{
+  "name": "@transadmin/delete-note",
+  "version": "1.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "prepack": "npm install && tsc",
+    "postpack": "npm-check-updates -u"
+  },
+  "dependencies": {
+    "tslib": "^1.11.1",
+    "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.46",
+    "@types/node": "^13.9.2",
+    "@types/uuid": "^7.0.2",
+    "aws-sdk": "^2.643.0",
+    "npm-check-updates": "^4.0.4",
+    "typescript": "^3.8.3"
+  }
+}
