@@ -1,9 +1,8 @@
-AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 6
 
 Resources:
   DeleteNoteFunction:
@@ -14,7 +13,7 @@ Resources:
       Runtime: nodejs12.x
       Events:
         HelloWorld:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /delete-note
             Method: delete
