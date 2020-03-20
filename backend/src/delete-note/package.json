@@ -1,7 +1,7 @@
 {
-  "private": true,
   "name": "@transadmin/delete-note",
   "version": "1.0.0",
+  "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "prepack": "npm update --dev && npm install && tsc",
@@ -9,14 +9,17 @@
     "deploy": "bash ../../scripts/update-function-code.sh"
   },
   "dependencies": {
-    "tslib": "^1.11.1"
+    "tslib": "^1.11.1",
+    "uuid": "^7.0.2"
   },
   "bundleDependencies": [
-    "tslib"
+    "tslib",
+    "uuid"
   ],
   "devDependencies": {
     "@types/aws-lambda": "^8.10.46",
     "@types/node": "^13.9.1",
+    "@types/uuid": "^7.0.2",
     "aws-sdk": "^2.641.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.8.3"

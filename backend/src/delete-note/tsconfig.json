@@ -8,9 +8,8 @@
       "dom"
     ],
     "declaration": false,
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "strict": true,
-    "allowSyntheticDefaultImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
