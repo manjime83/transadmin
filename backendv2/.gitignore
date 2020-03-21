@@ -1,6 +1,5 @@
-/node_modules
-/functions/*/*.js
-
 /.aws-sam
+/functions/*/*.js
+/node_modules
 
 tsconfig.tsbuildinfo
