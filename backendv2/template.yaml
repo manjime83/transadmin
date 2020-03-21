@@ -2,15 +2,37 @@ Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
-    Timeout: 6
+    Handler: index.handler
+    Runtime: nodejs12.x
+    Timeout: 5
 
 Resources:
+  GetNotesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/get-notes
+      Events:
+        HelloWorld:
+          Type: HttpApi
+          Properties:
+            Path: /get-notes
+            Method: get
+
+  CreateNoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/create-note
+      Events:
+        HelloWorld:
+          Type: HttpApi
+          Properties:
+            Path: /create-note
+            Method: delete
+
   DeleteNoteFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: delete-note/
-      Handler: index.handler
-      Runtime: nodejs12.x
+      CodeUri: functions/delete-note
       Events:
         HelloWorld:
           Type: HttpApi
@@ -19,9 +41,6 @@ Resources:
             Method: delete
 
 Outputs:
-  TransadminApi:
-    Description: 'API Gateway endpoint URL for Prod stage for Hello World function'
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/delete-note'
   DeleteNoteFunction:
     Description: 'Hello World Lambda Function ARN'
     Value: !GetAtt DeleteNoteFunction.Arn

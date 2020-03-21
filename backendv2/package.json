@@ -4,8 +4,10 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prepack": "npm install && tsc",
-    "postpack": "npm-check-updates -u && prettier --write *.{ts,json}"
+    "postinstall": "bash scripts/check-updates.sh && prettier --write **/*.{ts,json,yaml}",
+    "sam:build": "tsc && sam build",
+    "sam:deploy": "sam deploy",
+    "sam:all": "npm run sam:build && npm run sam:deploy"
   },
   "dependencies": {
     "tslib": "^1.11.1",

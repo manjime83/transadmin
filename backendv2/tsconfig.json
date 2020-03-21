@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "incremental": false,
+    "incremental": true,
     "target": "es2019",
     "module": "commonjs",
     "lib": ["es2019", "dom"],
@@ -10,8 +10,8 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "listEmittedFiles": true,
-    "forceConsistentCasingInFileNames": true
+    "listEmittedFiles": true
   }
 }
