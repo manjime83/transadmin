@@ -2,7 +2,6 @@
   "name": "@transadmin/delete-note",
   "version": "1.0.0",
   "dependencies": {
-    "tslib": "^1.11.1",
     "uuid": "^7.0.2"
   }
 }
