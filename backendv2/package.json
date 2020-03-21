@@ -5,9 +5,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "postinstall": "bash scripts/check-updates.sh && prettier --write **/*.{ts,json,yaml} --ignore-path .gitignore",
-    "sam:build": "tsc && sam build",
-    "sam:deploy": "sam deploy",
-    "sam:all": "npm run sam:build && npm run sam:deploy"
+    "sam:build": "tsc && sam build && find .aws-sam -exec touch -t 8510260120 {} +",
+    "sam:deploy": "npm run sam:build && sam deploy || exit 0"
   },
   "dependencies": {
     "tslib": "^1.11.1",

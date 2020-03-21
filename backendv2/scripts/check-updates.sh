@@ -6,13 +6,12 @@ DATA=($(json -f ./package.json name version))
 SCOPE=${DATA[0]}
 VERSION=${DATA[1]}
 
-for DIR in functions/*; do
-    if [ -d ${DIR} ]; then
-        echo "> updating function $(basename $DIR)..."
-        json --in-place -f ${DIR}/package.json -e "this.name = '@$SCOPE/$(basename $DIR)'; this.version = '$VERSION';"
-        npm-check-updates --upgrade --packageFile ${DIR}/package.json
-        echo ""
-    fi
+for DIR in find functions -maxdepth 1 -mindepth 1 -type d; do
+    FUNCTION_NAME=$(basename $DIR)
+    echo "> updating function $FUNCTION_NAME..."
+    json --in-place -f ${DIR}/package.json -e "this.name = '@$SCOPE/$FUNCTION_NAME'; this.version = '$VERSION';"
+    npm-check-updates --upgrade --packageFile ${DIR}/package.json
+    echo ""
 done
 
 echo "> packages updated!"
