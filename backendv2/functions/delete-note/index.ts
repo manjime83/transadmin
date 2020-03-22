@@ -13,8 +13,8 @@ export const handler: lambda.APIGatewayProxyWithCognitoAuthorizerHandler = async
       TableName: process.env.TABLE_NAME!,
       Item: {
         userId: uuid.v4(),
-        noteId: uuid.v4()
-      }
+        noteId: uuid.v4(),
+      },
     })
     .promise();
 
@@ -23,7 +23,7 @@ export const handler: lambda.APIGatewayProxyWithCognitoAuthorizerHandler = async
   return Promise.resolve<lambda.APIGatewayProxyResult>({
     statusCode: 200,
     body: JSON.stringify({
-      message: Math.floor(Math.random() * 10)
-    })
+      message: Math.floor(Math.random() * 10),
+    }),
   });
 };

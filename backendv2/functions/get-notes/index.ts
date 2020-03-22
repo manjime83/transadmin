@@ -9,7 +9,7 @@ export const handler: lambda.APIGatewayProxyWithCognitoAuthorizerHandler = async
   return Promise.resolve<lambda.APIGatewayProxyResult>({
     statusCode: 200,
     body: JSON.stringify({
-      message: Math.floor(Math.random() * 10)
-    })
+      message: Math.floor(Math.random() * 10),
+    }),
   });
 };
