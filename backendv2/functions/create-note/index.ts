@@ -1,6 +1,6 @@
-import * as lambda from 'aws-lambda';
-import * as AWS from 'aws-sdk';
-import * as uuid from 'uuid';
+import * as lambda from "aws-lambda";
+import * as AWS from "aws-sdk";
+import * as uuid from "uuid";
 
 const db = new AWS.DynamoDB.DocumentClient();
 
@@ -18,7 +18,7 @@ export const handler: lambda.APIGatewayProxyWithCognitoAuthorizerHandler = async
     })
     .promise();
 
-  console.log('hola mundo');
+  console.log("hola mundo");
 
   return Promise.resolve<lambda.APIGatewayProxyResult>({
     statusCode: 200,

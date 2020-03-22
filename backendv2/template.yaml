@@ -1,49 +1,88 @@
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  ProjectName:
+    Type: String
+  Environment:
+    Type: String
+
+Conditions:
+  IsProduction: !Equals [!Ref Environment, prod]
 
 Globals:
   Function:
     Handler: index.handler
     Runtime: nodejs12.x
-    Timeout: 5
+    Timeout: 10
 
 Resources:
+  NotesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join ["-", [!Ref ProjectName, !Ref Environment, notes]]
+      AttributeDefinitions:
+        - AttributeName: noteId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: noteId
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+  TransadminApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !If [IsProduction, "$default", !Ref Environment]
+      StageVariables:
+        NotesTable: !Ref NotesTable
+
   GetNotesFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, notes]]
       CodeUri: functions/get-notes
       Events:
         HelloWorld:
           Type: HttpApi
           Properties:
+            ApiId: !Ref TransadminApi
+            Method: GET
             Path: /get-notes
-            Method: get
 
   CreateNoteFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, create, note]]
       CodeUri: functions/create-note
       Events:
         HelloWorld:
           Type: HttpApi
           Properties:
+            ApiId: !Ref TransadminApi
+            Method: POST
             Path: /create-note
-            Method: delete
 
   DeleteNoteFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, delete, note]]
       CodeUri: functions/delete-note
       Events:
         HelloWorld:
           Type: HttpApi
           Properties:
+            ApiId: !Ref TransadminApi
+            Method: DELETE
             Path: /delete-note
-            Method: delete
 
 Outputs:
-  DeleteNoteFunction:
-    Description: 'Hello World Lambda Function ARN'
-    Value: !GetAtt DeleteNoteFunction.Arn
-  DeleteNoteFunctionIamRole:
-    Description: 'Implicit IAM Role created for Hello World function'
-    Value: !GetAtt DeleteNoteFunction.Arn
+  TransadminApi:
+    Description: API Gateway endpoint URL
+    Value:
+      Fn::Sub: https://${TransadminApi}.execute-api.${AWS::Region}.amazonaws.com/
