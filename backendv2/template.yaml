@@ -39,7 +39,6 @@ Resources:
   TransadminApi:
     Type: AWS::Serverless::HttpApi
     Properties:
-      StageName: !Ref Environment
       CorsConfiguration:
         AllowOrigins:
           - "*"
@@ -56,8 +55,8 @@ Resources:
             JwtConfiguration:
               issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
               audience:
-                - UserPoolClient
-            IdentitySource: "$request.querystring.param"
+                - !Ref UserPoolClient
+            IdentitySource: $request.header.Authorization
     FailOnWarnings: true
 
   NotesTable:
@@ -140,9 +139,9 @@ Resources:
       CodeUri: functions/delete-note
       Events:
         HelloWorld:
-          Type: Api
+          Type: HttpApi
           Properties:
-            RestApiId: !Ref TransadminApi
+            ApiId: !Ref TransadminApi
             Method: DELETE
             Path: /notes/{noteId}
 
