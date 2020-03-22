@@ -1,17 +1,22 @@
-name: CI
+name: sam deploy
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Run a one-line script
-      run: npm run deploy:prod
+      - name: Check for versions
+        run: npm --version; node --version
+
+      - name: list files
+        run: ls -la
