@@ -6,7 +6,8 @@
   "scripts": {
     "postinstall": "bash scripts/check-updates.sh && prettier --write **/*.{ts,json,yaml} --ignore-path .gitignore",
     "sam:build": "tsc && sam build && find .aws-sam -exec touch -t 8510260120 {} +",
-    "sam:deploy": "npm run sam:build && sam deploy || exit 0"
+    "sam:deploy": "npm run sam:build && sam deploy || exit 0",
+    "update": "tsc && bash scripts/update-function-code.sh"
   },
   "dependencies": {
     "uuid": "^7.0.2"
