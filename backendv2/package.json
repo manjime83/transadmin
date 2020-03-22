@@ -4,7 +4,8 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "postinstall": "bash scripts/check-updates.sh && prettier --write **/*.{ts,json,yaml} --ignore-path .gitignore",
+    "postinstall": "bash scripts/check-updates.sh && npm run lint",
+    "lint": "prettier --write **/*.{ts,json,yaml} --ignore-path .gitignore --loglevel warn",
     "build": "tsc && sam build && find .aws-sam -exec touch -t 8510260120 {} +",
     "deploy": "npm run build && sam deploy || exit 0",
     "update": "tsc && bash scripts/update-function-code.sh"
@@ -14,9 +15,10 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.46",
-    "@types/node": "^13.9.2",
+    "@types/node": "^13.9.3",
     "@types/uuid": "^7.0.2",
     "aws-sdk": "^2.643.0",
+    "husky": "^4.2.3",
     "json": "^9.0.6",
     "npm-check-updates": "^4.0.4",
     "prettier": "^2.0.1",
@@ -24,5 +26,10 @@
   },
   "prettier": {
     "printWidth": 120
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && git add ."
+    }
   }
 }
