@@ -17,43 +17,59 @@ Globals:
     Timeout: 10
 
 Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AutoVerifiedAttributes:
+        - email
+      UserPoolName: !Join ["-", [!Ref ProjectName, !Ref Environment, users]]
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+      UsernameAttributes:
+        - email
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      ClientName: !Join ["-", [!Ref ProjectName, client]]
+      GenerateSecret: false
+
+  TransadminApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Join ["-", [!Ref ProjectName, api]]
+      StageName: !Ref Environment
+      EndpointConfiguration: REGIONAL
+      # Cors:
+      #   AllowOrigins: "*"
+      #   AllowHeaders: "*"
+      #   AllowMethods: "'GET, POST, PUT, DELETE'"
+      #   MaxAge: 600
+      Auth:
+        Authorizers:
+          Users:
+            UserPoolArn: !GetAtt UserPool.Arn
+    FailOnWarnings: true
+
   NotesTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Join ["-", [!Ref ProjectName, !Ref Environment, notes]]
-      AttributeDefinitions:
-        - AttributeName: noteId
-          AttributeType: S
-        - AttributeName: userId
-          AttributeType: S
       KeySchema:
         - AttributeName: noteId
           KeyType: HASH
         - AttributeName: userId
           KeyType: RANGE
+      AttributeDefinitions:
+        - AttributeName: noteId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
-
-  TransadminApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      StageName: !If [IsProduction, "$default", !Ref Environment]
-      StageVariables:
-        NotesTable: !Ref NotesTable
-
-  GetNotesFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, notes]]
-      CodeUri: functions/get-notes
-      Events:
-        HelloWorld:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref TransadminApi
-            Method: GET
-            Path: /get-notes
 
   CreateNoteFunction:
     Type: AWS::Serverless::Function
@@ -62,11 +78,53 @@ Resources:
       CodeUri: functions/create-note
       Events:
         HelloWorld:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref TransadminApi
+            RestApiId: !Ref TransadminApi
             Method: POST
-            Path: /create-note
+            Path: /notes
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref NotesTable
+
+  GetNoteListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, note, list]]
+      CodeUri: functions/get-notes
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TransadminApi
+            Method: GET
+            Path: /notes
+
+  GetNoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, notes]]
+      CodeUri: functions/get-notes
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TransadminApi
+            Method: GET
+            Path: /notes/{noteId}
+
+  UpdateNoteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, update, note]]
+      CodeUri: functions/delete-note
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            RestApiId: !Ref TransadminApi
+            Method: PUT
+            Path: /notes/{noteId}
 
   DeleteNoteFunction:
     Type: AWS::Serverless::Function
@@ -75,14 +133,14 @@ Resources:
       CodeUri: functions/delete-note
       Events:
         HelloWorld:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref TransadminApi
+            RestApiId: !Ref TransadminApi
             Method: DELETE
-            Path: /delete-note
+            Path: /notes/{noteId}
 
 Outputs:
   TransadminApi:
     Description: API Gateway endpoint URL
     Value:
-      Fn::Sub: https://${TransadminApi}.execute-api.${AWS::Region}.amazonaws.com/
+      Fn::Sub: https://${TransadminApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
