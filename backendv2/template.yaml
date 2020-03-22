@@ -37,20 +37,27 @@ Resources:
       GenerateSecret: false
 
   TransadminApi:
-    Type: AWS::Serverless::Api
+    Type: AWS::Serverless::HttpApi
     Properties:
-      Name: !Join ["-", [!Ref ProjectName, api]]
       StageName: !Ref Environment
-      EndpointConfiguration: REGIONAL
-      # Cors:
-      #   AllowOrigins: "*"
-      #   AllowHeaders: "*"
-      #   AllowMethods: "'GET, POST, PUT, DELETE'"
-      #   MaxAge: 600
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - "*"
+        AllowMethods:
+          - "POST"
+          - "GET"
+          - "PUT"
+          - "DELETE"
       Auth:
         Authorizers:
-          Users:
-            UserPoolArn: !GetAtt UserPool.Arn
+          Cognito:
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
+              audience:
+                - UserPoolClient
+            IdentitySource: "$request.querystring.param"
     FailOnWarnings: true
 
   NotesTable:
@@ -78,9 +85,9 @@ Resources:
       CodeUri: functions/create-note
       Events:
         HelloWorld:
-          Type: Api
+          Type: HttpApi
           Properties:
-            RestApiId: !Ref TransadminApi
+            ApiId: !Ref TransadminApi
             Method: POST
             Path: /notes
       Policies:
@@ -94,9 +101,9 @@ Resources:
       CodeUri: functions/get-notes
       Events:
         HelloWorld:
-          Type: Api
+          Type: HttpApi
           Properties:
-            RestApiId: !Ref TransadminApi
+            ApiId: !Ref TransadminApi
             Method: GET
             Path: /notes
 
@@ -107,9 +114,9 @@ Resources:
       CodeUri: functions/get-notes
       Events:
         HelloWorld:
-          Type: Api
+          Type: HttpApi
           Properties:
-            RestApiId: !Ref TransadminApi
+            ApiId: !Ref TransadminApi
             Method: GET
             Path: /notes/{noteId}
 
@@ -120,9 +127,9 @@ Resources:
       CodeUri: functions/delete-note
       Events:
         HelloWorld:
-          Type: Api
+          Type: HttpApi
           Properties:
-            RestApiId: !Ref TransadminApi
+            ApiId: !Ref TransadminApi
             Method: PUT
             Path: /notes/{noteId}
 
