@@ -1,4 +1,4 @@
-name: sam deploy
+name: backend
 
 on:
   push:
@@ -19,13 +19,6 @@ jobs:
       - name: install aws-sam-cli
         run: pip3 install aws-sam-cli
 
-      - uses: actions/checkout@v2
-
-      - name: build
-        run: |
-          cd backend && npm install
-          cd backend && npm run build
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -33,5 +26,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - uses: actions/checkout@v2
+
       - name: deploy
-        run: sam deploy --stack-name transadmin-prod --s3-bucket ${{ secrets.SAM_S3_BUCKET }} --s3-prefix transadmin --capabilities CAPABILITY_NAMED_IAM
+        run: |
+          cd backend
+          npm install
+          npm run build
+          sam deploy --stack-name transadmin-prod --s3-bucket ${{ secrets.SAM_S3_BUCKET }} --s3-prefix transadmin --capabilities CAPABILITY_NAMED_IAM
