@@ -74,76 +74,48 @@ Resources:
         - AttributeName: userId
           AttributeType: S
       ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
 
-  CreateNoteFunction:
+  NotesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, create, note]]
-      CodeUri: functions/create-note
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, notes]]
+      CodeUri: functions/notes
       Events:
-        HelloWorld:
+        Create:
           Type: HttpApi
           Properties:
             ApiId: !Ref TransadminApi
             Method: POST
             Path: /notes
-      Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref NotesTable
-
-  GetNoteListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, note, list]]
-      CodeUri: functions/get-notes
-      Events:
-        HelloWorld:
+        List:
           Type: HttpApi
           Properties:
             ApiId: !Ref TransadminApi
             Method: GET
             Path: /notes
-
-  GetNoteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, notes]]
-      CodeUri: functions/get-notes
-      Events:
-        HelloWorld:
+        Get:
           Type: HttpApi
           Properties:
             ApiId: !Ref TransadminApi
             Method: GET
             Path: /notes/{noteId}
-
-  UpdateNoteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, update, note]]
-      CodeUri: functions/delete-note
-      Events:
-        HelloWorld:
+        Update:
           Type: HttpApi
           Properties:
             ApiId: !Ref TransadminApi
             Method: PUT
             Path: /notes/{noteId}
-
-  DeleteNoteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, delete, note]]
-      CodeUri: functions/delete-note
-      Events:
-        HelloWorld:
+        Delete:
           Type: HttpApi
           Properties:
             ApiId: !Ref TransadminApi
             Method: DELETE
             Path: /notes/{noteId}
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref NotesTable
 
 Outputs:
   TransadminApi:
