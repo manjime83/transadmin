@@ -1,5 +1,0 @@
-/.aws-sam
-/functions/*/*.js
-/node_modules
-/samconfig.toml
-/tsconfig.tsbuildinfo

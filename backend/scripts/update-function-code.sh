@@ -1,8 +1,9 @@
 #!/bin/bash
 
-PACKAGE_NAME=($(echo $npm_package_name | cut -c2- | awk -F'/' '{ print $1, $2 }'))
-SCOPE=${PACKAGE_NAME[0]}
-PACKAGE_NAME=${PACKAGE_NAME[1]}
+[ -d functions/$1 ] || { echo "Function '$1' not found."; exit 1; }
 
-mkdir -p ../../build && cd ../../build
-aws lambda update-function-code --function-name $SCOPE-$PACKAGE_NAME-${NODE_ENV:-development} --zip-file fileb://$SCOPE-$PACKAGE_NAME.zip
+cd functions/$1
+npm install --production --no-package-lock
+zip -qr ../../.aws-sam/$1.zip .
+aws lambda update-function-code --function-name $npm_package_name-test-$1 --zip-file fileb://../../.aws-sam/$1.zip
+rm -rf node_modules
