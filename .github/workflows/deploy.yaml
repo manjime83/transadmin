@@ -17,7 +17,7 @@ jobs:
         run: sudo apt-get install python3-setuptools python3-wheel
 
       - name: install aws-sam-cli
-        run: pip3 install aws-sam-cli
+        run: pip3 install --user aws-sam-cli
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -32,5 +32,5 @@ jobs:
         run: |
           cd backend
           npm install
-          npm run build
+          tsc && sam validate && sam build && find .aws-sam -exec touch -t 8510260120 {} +
           sam deploy --stack-name transadmin-prod --s3-bucket ${{ secrets.SAM_S3_BUCKET }} --s3-prefix transadmin --capabilities CAPABILITY_NAMED_IAM
