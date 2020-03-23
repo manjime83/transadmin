@@ -19,4 +19,16 @@ jobs:
         run: npm --version; node --version
 
       - name: list files
-        run: ls -la
+        run: cd backendv2 && ls -la
+
+      - name: aws
+        run: aws --version
+
+      - name: sam
+        run: sam --version
+
+      - name: python
+        run: python --version
+
+      - name: pip
+        run: pip --version
