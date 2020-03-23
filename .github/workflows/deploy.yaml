@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: install sam
-        run: apt-get install python3-setuptools $$ pip3 install aws-sam-cli
+        run: apt-get install python3-setuptools && pip3 install aws-sam-cli
 
       - uses: actions/checkout@v2
 
