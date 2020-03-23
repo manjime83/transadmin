@@ -13,8 +13,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: aws
-        run: pip install aws-sam-cli
+      - name: install sam
+        run: pip3 install aws-sam-cli
 
       - uses: actions/checkout@v2
 
