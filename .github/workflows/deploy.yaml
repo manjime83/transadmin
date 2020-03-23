@@ -19,7 +19,7 @@ jobs:
         run: sudo apt-get install python3-setuptools python3-wheel
 
       - name: install aws-sam-cli
-        run: pip3 install --user aws-sam-cli
+        run: pip3 install aws-sam-cli
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
