@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: install python3-deps
-        run: sudo apt-get install python3-all-dev
+        run: sudo apt-get install python3-setuptools python3-wheel
 
       - name: install aws-sam-cli
         run: pip3 install aws-sam-cli
