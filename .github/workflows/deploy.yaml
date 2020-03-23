@@ -33,6 +33,7 @@ jobs:
       - name: deploy
         run: |
           cd backend
+          export SAM_CLI_TELEMETRY=0
           npm install
           npm run build
-          sam deploy --stack-name transadmin-prod --s3-bucket ${{ secrets.SAM_S3_BUCKET }} --s3-prefix transadmin --capabilities CAPABILITY_NAMED_IAM
+          sam deploy --stack-name transadmin-prod --s3-bucket ${{ secrets.SAM_S3_BUCKET }} --s3-prefix transadmin --capabilities CAPABILITY_NAMED_IAM --parameter-overrides ParameterKey=ProjectName,ParameterValue=transadmin ParameterKey=Environment,ParameterValue=prod
