@@ -13,8 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: install sam
-        run: sudo apt-get install python3-setuptools && pip3 install aws-sam-cli
+      - name: install python3-setuptools
+        run: sudo apt-get install python3-setuptools
+
+      - name: install aws-sam-cli
+        run: pip3 install wheel aws-sam-cli
 
       - uses: actions/checkout@v2
 
