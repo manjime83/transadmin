@@ -19,7 +19,7 @@ jobs:
         run: npm --version; node --version
 
       - name: list files
-        run: cd backendv2 && ls -la
+        run: cd backend && ls -la
 
       - name: aws
         run: aws --version
