@@ -17,11 +17,11 @@
     "@types/aws-lambda": "^8.10.46",
     "@types/node": "^13.9.3",
     "@types/uuid": "^7.0.2",
-    "aws-sdk": "^2.643.0",
+    "aws-sdk": "^2.644.0",
     "husky": "^4.2.3",
     "json": "^9.0.6",
-    "npm-check-updates": "^4.0.4",
-    "prettier": "^2.0.1",
+    "npm-check-updates": "^4.0.5",
+    "prettier": "^2.0.2",
     "typescript": "^3.8.3"
   },
   "prettier": {

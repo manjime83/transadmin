@@ -1,7 +1,0 @@
-{
-  "name": "@transadmin/create-note",
-  "version": "1.0.0",
-  "dependencies": {
-    "uuid": "7.0.2"
-  }
-}

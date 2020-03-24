@@ -20,13 +20,13 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      AutoVerifiedAttributes:
-        - email
       UserPoolName: !Join ["-", [!Ref ProjectName, !Ref Environment, users]]
       Policies:
         PasswordPolicy:
           MinimumLength: 8
       UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
         - email
 
   UserPoolClient:
@@ -35,6 +35,23 @@ Resources:
       UserPoolId: !Ref UserPool
       ClientName: !Join ["-", [!Ref ProjectName, client]]
       GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+      ReadAttributes:
+        - email
+        - email_verified
+        - name
+      WriteAttributes:
+        - email
+        - name
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: !Join ["-", [!Ref ProjectName, !Ref Environment]]
 
   TransadminApi:
     Type: AWS::Serverless::HttpApi
@@ -100,19 +117,19 @@ Resources:
           Properties:
             ApiId: !Ref TransadminApi
             Method: GET
-            Path: /notes/{noteId}
+            Path: /notes/{id}
         Update:
           Type: HttpApi
           Properties:
             ApiId: !Ref TransadminApi
             Method: PUT
-            Path: /notes/{noteId}
+            Path: /notes/{id}
         Delete:
           Type: HttpApi
           Properties:
             ApiId: !Ref TransadminApi
             Method: DELETE
-            Path: /notes/{noteId}
+            Path: /notes/{id}
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref NotesTable
