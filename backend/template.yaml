@@ -59,13 +59,13 @@ Resources:
       CorsConfiguration:
         AllowOrigins:
           - "*"
+        AllowMethods:
+          - POST
+          - GET
+          - PUT
+          - DELETE
         AllowHeaders:
           - "*"
-        AllowMethods:
-          - "POST"
-          - "GET"
-          - "PUT"
-          - "DELETE"
       Auth:
         Authorizers:
           Cognito:
@@ -74,7 +74,9 @@ Resources:
               audience:
                 - !Ref UserPoolClient
             IdentitySource: $request.header.Authorization
-    FailOnWarnings: true
+      FailOnWarnings: true
+      StageVariables:
+        NOTES_TABLE: !Ref NotesTable
 
   NotesTable:
     Type: AWS::DynamoDB::Table
