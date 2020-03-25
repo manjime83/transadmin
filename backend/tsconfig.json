@@ -4,6 +4,7 @@
     "target": "es2019",
     "module": "commonjs",
     "lib": ["es2019", "dom"],
+    "outDir": "build",
     "declaration": false,
     "strict": true,
     "noUnusedLocals": true,

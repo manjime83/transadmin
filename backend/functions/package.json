@@ -4,5 +4,8 @@
   "private": true,
   "dependencies": {
     "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.644.0"
   }
 }

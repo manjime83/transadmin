@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context, APIGatewayProxyResult } from "aws-lambda";
-import { buildResult } from "./lib/build-result";
+import { buildResult } from "./lib/transadmin";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 

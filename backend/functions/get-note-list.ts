@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context, APIGatewayProxyResult } from "aws-lambda";
-import { buildResult } from "./lib/build-result";
+import { buildResult } from "./lib/transadmin";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
@@ -8,19 +8,17 @@ export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent,
   _context: Context
 ): Promise<APIGatewayProxyResult> => {
-  const params: AWS.DynamoDB.DocumentClient.DeleteItemInput = {
+  const params: AWS.DynamoDB.DocumentClient.QueryInput = {
     TableName: event.stageVariables!.NOTES_TABLE,
-    Key: {
-      userId: event.requestContext.apiId,
-      noteId: event.pathParameters!.id,
+    KeyConditionExpression: "userId = :userId",
+    ExpressionAttributeValues: {
+      ":userId": event.requestContext.apiId,
     },
-    ConditionExpression: "attribute_exists(userId)",
-    ReturnValues: "ALL_OLD",
   };
 
   try {
-    const output = await dynamodb.delete(params).promise();
-    return buildResult(200, output.Attributes);
+    const output = await dynamodb.query(params).promise(); // query
+    return buildResult(200, output.Items);
   } catch (e) {
     console.error(e);
     const { code, message } = e;
