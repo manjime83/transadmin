@@ -83,18 +83,18 @@ Resources:
     Properties:
       TableName: !Join ["-", [!Ref ProjectName, !Ref Environment, notes]]
       KeySchema:
-        - AttributeName: noteId
-          KeyType: HASH
         - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: noteId
           KeyType: RANGE
       AttributeDefinitions:
-        - AttributeName: noteId
-          AttributeType: S
         - AttributeName: userId
           AttributeType: S
+        - AttributeName: noteId
+          AttributeType: S
       ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
 
   NotesFunction:
     Type: AWS::Serverless::Function
