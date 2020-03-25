@@ -7,26 +7,25 @@
     "postinstall": "bash scripts/check-updates.sh && npm run lint",
     "lint": "prettier --write **/*.{ts,json,yaml} --ignore-path .gitignore --loglevel warn",
     "build": "tsc && sam validate && sam build && find .aws-sam -exec touch -t 8510260120 {} +",
+    "build2": "bash scripts/build.sh",
     "deploy": "npm run build && sam deploy --no-fail-on-empty-changeset",
     "update": "tsc && bash scripts/update-function-code.sh"
   },
   "dependencies": {
+    "ci": "^1.0.0",
     "uuid": "^7.0.2"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.46",
-    "@types/gulp": "^4.0.6",
     "@types/node": "^13.9.3",
     "@types/uuid": "^7.0.2",
     "aws-sdk": "^2.646.0",
-    "gulp": "^4.0.2",
-    "gulp-typescript": "^6.0.0-alpha.1",
     "husky": "^4.2.3",
     "json": "^9.0.6",
     "npm-check-updates": "^4.0.6",
     "prettier": "^2.0.2",
-    "ts-node": "^8.8.1",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "vinyl-paths": "^3.0.1"
   },
   "prettier": {
     "printWidth": 120
