@@ -1,6 +1,6 @@
 #!/bin/bash
 
-aws s3 cp swagger.json s3://transadmin.co/.aws/build/${1:-test}/swagger.json
+aws s3 cp swagger.json s3://transadmin.co/.aws/build/${1:-test}/swagger.yaml
 
 aws cloudformation package --template-file template.yaml --s3-bucket transadmin.co --s3-prefix .aws/build/${1:-test} --output-template-file .aws/template.yaml
 

@@ -52,7 +52,7 @@ Resources:
       # Name: !Join ["-", [!Ref ProjectName, !Ref Environment]]
       BodyS3Location:
         Bucket: transadmin.co
-        Key: .aws/build/test/swagger.json
+        Key: .aws/build/test/swagger.yaml
       FailOnWarnings: true
       # CorsConfiguration:
       #   AllowOrigins:
