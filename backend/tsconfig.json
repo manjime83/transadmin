@@ -4,14 +4,13 @@
     "target": "es2019",
     "module": "commonjs",
     "lib": ["es2019", "dom"],
-    "outDir": "build",
+    "outDir": ".aws/build",
     "declaration": false,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "forceConsistentCasingInFileNames": true,
-    "listEmittedFiles": true
+    "forceConsistentCasingInFileNames": true
   }
 }
