@@ -8,9 +8,9 @@ find .aws/layers -mindepth 1 -delete
 find .aws/functions -mindepth 1 -delete
 
 cd .aws/build/nodejs
-cp ../../../package.json .
-npm install --production --no-package-lock
-rm package.json
+cp ../../../package*.json .
+npm ci --production
+rm package*.json
 cd ../../..
 
 tsc
