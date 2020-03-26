@@ -1,5 +1,4 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Transform: AWS::Serverless-2016-10-31
 
 Parameters:
   ProjectName:
@@ -9,12 +8,6 @@ Parameters:
 
 Conditions:
   IsProduction: !Equals [!Ref Environment, prod]
-
-Globals:
-  Function:
-    Handler: index.handler
-    Runtime: nodejs12.x
-    Timeout: 10
 
 Resources:
   UserPool:
@@ -28,6 +21,12 @@ Resources:
         - email
       AutoVerifiedAttributes:
         - email
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: !Join ["-", [!Ref ProjectName, !Ref Environment]]
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
@@ -47,36 +46,45 @@ Resources:
         - email
         - name
 
-  UserPoolDomain:
-    Type: AWS::Cognito::UserPoolDomain
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
     Properties:
-      UserPoolId: !Ref UserPool
-      Domain: !Join ["-", [!Ref ProjectName, !Ref Environment]]
-
-  TransadminApi:
-    Type: AWS::Serverless::HttpApi
-    Properties:
-      CorsConfiguration:
-        AllowOrigins:
-          - "*"
-        AllowMethods:
-          - POST
-          - GET
-          - PUT
-          - DELETE
-        AllowHeaders:
-          - "*"
-      Auth:
-        Authorizers:
-          Cognito:
-            JwtConfiguration:
-              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
-              audience:
-                - !Ref UserPoolClient
-            IdentitySource: $request.header.Authorization
+      # Name: !Join ["-", [!Ref ProjectName, !Ref Environment]]
+      BodyS3Location:
+        Bucket: transadmin.co
+        Key: .aws/build/test/swagger.json
       FailOnWarnings: true
+      # CorsConfiguration:
+      #   AllowOrigins:
+      #     - "*"
+      #   AllowMethods:
+      #     - POST
+      #     - GET
+      #     - PUT
+      #     - DELETE
+      #   AllowHeaders:
+      #     - "*"
+
+  HttpApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref HttpApi
+      StageName: $default
       StageVariables:
         NOTES_TABLE: !Ref NotesTable
+
+  CognitoAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      Name: !Join ["-", [!Ref ProjectName, !Ref Environment, cognito]]
+      ApiId: !Ref HttpApi
+      AuthorizerType: JWT
+      IdentitySource:
+        - $request.header.Authorization
+      JwtConfiguration:
+        Audience:
+          - !Ref UserPoolClient
+        Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
 
   NotesTable:
     Type: AWS::DynamoDB::Table
@@ -93,51 +101,74 @@ Resources:
         - AttributeName: noteId
           AttributeType: S
       ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
 
-  NotesFunction:
-    Type: AWS::Serverless::Function
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
     Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, notes]]
-      CodeUri: functions/notes
-      Events:
-        Create:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref TransadminApi
-            Method: POST
-            Path: /notes
-        List:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref TransadminApi
-            Method: GET
-            Path: /notes
-        Get:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref TransadminApi
-            Method: GET
-            Path: /notes/{id}
-        Update:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref TransadminApi
-            Method: PUT
-            Path: /notes/{id}
-        Delete:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref TransadminApi
-            Method: DELETE
-            Path: /notes/{id}
-      Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref NotesTable
+      LayerName: !Join ["-", [!Ref ProjectName, !Ref Environment]]
+      Content: .aws/layers/transadmin.zip
+      CompatibleRuntimes:
+        - nodejs12.x
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ["-", [!Ref ProjectName, !Ref Environment, lambda, role]]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Principal:
+              Service:
+                - lambda.amazonaws.com
+            Effect: "Allow"
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  DynamoDBPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Join ["-", [!Ref ProjectName, !Ref Environment, dynamodb, policy]]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:Query
+              - dynamodb:Scan
+              - dynamodb:GetItem
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+            Resource:
+              - !GetAtt NotesTable.Arn
+      Roles:
+        - !Ref LambdaRole
+
+  LambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref CreateNoteFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}
+
+  CreateNoteFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, create, note]]
+      Runtime: nodejs12.x
+      Code: .aws/functions/create-note.zip
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Layers:
+        - !Ref LambdaLayer
 
 Outputs:
-  TransadminApi:
+  HttpApi:
     Description: API Gateway endpoint URL
     Value:
-      Fn::Sub: https://${TransadminApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
+      Fn::Sub: https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}

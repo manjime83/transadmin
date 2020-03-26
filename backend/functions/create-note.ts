@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context, APIGatewayProxyResult } from "aws-lambda";
-import { buildResult } from "./lib/commons";
+import * as commons from "./lib/commons";
 import * as uuid from "uuid";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
@@ -10,7 +10,7 @@ export const handler: APIGatewayProxyHandler = async (
   _context: Context
 ): Promise<APIGatewayProxyResult> => {
   if (event.body == null) {
-    return buildResult(400, { error: { message: "Bad Request" } });
+    return commons.buildResult(400, { error: { message: "Bad Request" } });
   }
 
   const { content, attachment } = JSON.parse(event.body);
@@ -29,10 +29,10 @@ export const handler: APIGatewayProxyHandler = async (
 
   try {
     await dynamodb.put(params).promise();
-    return buildResult(201, params.Item);
+    return commons.buildResult(201, params.Item);
   } catch (e) {
     console.error(e);
     const { code, message } = e;
-    return buildResult(500, { error: { code, message } });
+    return commons.buildResult(500, { error: { code, message } });
   }
 };
