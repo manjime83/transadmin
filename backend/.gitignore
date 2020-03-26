@@ -1,5 +1,4 @@
-/.aws-sam
+/.aws
 /functions/**/*.js
 /node_modules
-/samconfig.toml
 /build
