@@ -5,11 +5,58 @@ Parameters:
     Type: String
   Environment:
     Type: String
+  DomainName:
+    Type: String
+  AuthCertificateId:
+    Type: String
+  ApiCertificateId:
+    Type: String
 
 Conditions:
   IsProduction: !Equals [!Ref Environment, prod]
 
 Resources:
+  # CUSTOM RESOURCES
+
+  CustomResourceLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ["-", [!Ref ProjectName, !Ref Environment, custom, resource, lambda, role]]
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Principal:
+              Service:
+                - lambda.amazonaws.com
+            Effect: "Allow"
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: !Join ["-", [!Ref ProjectName, !Ref Environment, user, pool, policy]]
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:DescribeUserPoolDomain
+                Resource:
+                  - "*"
+
+  DescribeUserPoolDomainDescriptionFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, aws, describe, user, pool, domain]]
+      Runtime: nodejs12.x
+      Code: .aws/functions/aws-describe-user-pool-domain.zip
+      Handler: index.handler
+      Role: !GetAtt CustomResourceLambdaRole.Arn
+      Layers:
+        - !Ref LambdaLayer
+
+  # USER POOL
+
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -17,6 +64,10 @@ Resources:
       Policies:
         PasswordPolicy:
           MinimumLength: 8
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
       UsernameAttributes:
         - email
       AutoVerifiedAttributes:
@@ -26,7 +77,25 @@ Resources:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
       UserPoolId: !Ref UserPool
-      Domain: !Join ["-", [!Ref ProjectName, !Ref Environment]]
+      Domain: !Join [".", [auth, !Ref DomainName]]
+      CustomDomainConfig:
+        CertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${AuthCertificateId}
+
+  UserPoolDomainDescription:
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !GetAtt DescribeUserPoolDomainDescriptionFunction.Arn
+      Domain: !Join [".", [auth, !Ref DomainName]]
+
+  UserPoolDomainRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Join [".", [!Ref DomainName, ""]]
+      Name: !Join [".", [auth, !Ref DomainName, ""]]
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt UserPoolDomainDescription.CloudFrontDistribution
+        HostedZoneId: Z2FDTNDATAQYW2
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
@@ -46,14 +115,16 @@ Resources:
         - email
         - name
 
+  # API GATEWAY
+
   HttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
       # Name: !Join ["-", [!Ref ProjectName, !Ref Environment]]
       BodyS3Location:
-        Bucket: transadmin.co
-        Key: .aws/test/swagger.yaml
-      FailOnWarnings: true
+        Bucket: !Join ["-", [!Ref ProjectName, devops]]
+        Key: !Join ["/", [!Ref Environment, swagger.yaml]]
+      FailOnWarnings: false
       # CorsConfiguration:
       #   AllowOrigins:
       #     - "*"
@@ -169,6 +240,4 @@ Resources:
 
 Outputs:
   HttpApi:
-    Description: API Gateway endpoint URL
-    Value:
-      Fn::Sub: https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
+    Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
