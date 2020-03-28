@@ -15,11 +15,11 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.46",
-    "@types/node": "^13.9.3",
+    "@types/node": "^13.9.5",
     "@types/uuid": "^7.0.2",
-    "aws-sdk": "^2.646.0",
+    "aws-sdk": "^2.648.0",
     "cli-watch": "^1.0.7",
-    "npm-check-updates": "^4.0.6",
+    "npm-check-updates": "^4.1.0",
     "prettier": "^2.0.2",
     "typescript": "^3.8.3"
   },
