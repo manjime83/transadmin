@@ -9,7 +9,7 @@ find .aws/functions -mindepth 1 -delete
 
 cd .aws/build/nodejs
 cp ../../../package*.json .
-npm ci --production
+npm install --production
 rm package*.json
 cd ../../..
 
@@ -24,5 +24,5 @@ for lambda in $(find . -maxdepth 1 -name "*.js" -type f); do
 done
 rm index.js
 
-cd..
+cd ..
 curl https://api.swaggerhub.com/apis/transadmin.co/transadmin-api/1.0.0/swagger.yaml --output swagger.yaml --silent
