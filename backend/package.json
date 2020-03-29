@@ -12,12 +12,12 @@
     "update:watch": "watch -n -f \"functions/*.ts\" -r \"bash scripts/update.sh ${n}\""
   },
   "dependencies": {
-    "cfn-response": "^1.0.1",
+    "axios": "^0.19.2",
+    "tslib": "^1.11.1",
     "uuid": "^7.0.2"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.46",
-    "@types/cfn-response": "^1.0.3",
     "@types/node": "^13.9.5",
     "@types/uuid": "^7.0.2",
     "aws-sdk": "^2.648.0",

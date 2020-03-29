@@ -51,6 +51,7 @@ Resources:
       Runtime: nodejs12.x
       Code: .aws/functions/aws-describe-user-pool-domain.zip
       Handler: index.handler
+      Timeout: 10
       Role: !GetAtt CustomResourceLambdaRole.Arn
       Layers:
         - !Ref LambdaLayer
@@ -121,7 +122,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Api
     Properties:
       # Name: !Join ["-", [!Ref ProjectName, !Ref Environment]]
-      BodyS3Location:
+      BodyS3Location: # .aws/swagger.yaml
         Bucket: !Join ["-", [!Ref ProjectName, devops]]
         Key: !Join ["/", [!Ref Environment, swagger.yaml]]
       FailOnWarnings: false
