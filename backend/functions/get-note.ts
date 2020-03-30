@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context, APIGatewayProxyResult } from "aws-lambda";
-import { buildResult } from "./lib/commons";
+import * as commons from "./lib/commons";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
@@ -19,13 +19,13 @@ export const handler: APIGatewayProxyHandler = async (
   try {
     const output = await dynamodb.get(params).promise();
     if (output.Item) {
-      return buildResult(200, output.Item);
+      return commons.buildProxyResult(200, output.Item);
     } else {
-      return buildResult(404, { error: { message: "Not Found" } });
+      return commons.buildProxyResult(404, { error: { message: "Not Found" } });
     }
   } catch (e) {
     console.error(e);
     const { code, message } = e;
-    return buildResult(500, { error: { code, message } });
+    return commons.buildProxyResult(500, { error: { code, message } });
   }
 };

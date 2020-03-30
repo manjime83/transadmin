@@ -1,6 +1,6 @@
 import * as AWS from "aws-sdk";
 import { APIGatewayProxyHandler, APIGatewayProxyEvent, Context, APIGatewayProxyResult } from "aws-lambda";
-import { buildResult } from "./lib/commons";
+import * as commons from "./lib/commons";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
@@ -20,10 +20,10 @@ export const handler: APIGatewayProxyHandler = async (
 
   try {
     const output = await dynamodb.delete(params).promise();
-    return buildResult(200, output.Attributes);
+    return commons.buildProxyResult(200, output.Attributes);
   } catch (e) {
     console.error(e);
     const { code, message } = e;
-    return buildResult(500, { error: { code, message } });
+    return commons.buildProxyResult(500, { error: { code, message } });
   }
 };
