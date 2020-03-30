@@ -17,7 +17,7 @@ export const handler: APIGatewayProxyHandler = async (
   };
 
   try {
-    const output = await dynamodb.query(params).promise(); // query
+    const output = await dynamodb.query(params).promise();
     return commons.buildProxyResult(200, output.Items);
   } catch (e) {
     console.error(e);
