@@ -4,8 +4,6 @@ ENV=${1:-test}
 
 PROJECT_NAME='transadmin'
 
-aws s3 sync .aws s3://$PROJECT_NAME-devops/$ENV --exclude "*" --include swagger.yaml
-
 aws cloudformation package --template-file template.yaml --s3-bucket $PROJECT_NAME-devops --s3-prefix $ENV --output-template-file .aws/template.yaml
 
 aws cloudformation deploy --template-file .aws/template.yaml --stack-name $PROJECT_NAME-$ENV --capabilities CAPABILITY_NAMED_IAM --no-fail-on-empty-changeset \

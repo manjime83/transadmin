@@ -23,7 +23,3 @@ for lambda in $(find . -maxdepth 1 -name "*.js" -type f); do
     zip -Xqr ../functions/$(basename $lambda .js).zip index.js lib
 done
 rm index.js
-
-cd ..
-curl https://api.swaggerhub.com/apis/transadmin.co/transadmin-api/1.0.0/swagger.yaml --output swagger.yaml --silent
-touch -t 8510260120 swagger.yaml
