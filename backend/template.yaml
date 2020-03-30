@@ -21,7 +21,7 @@ Resources:
   CustomResourceLambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join ["-", [!Ref ProjectName, !Ref Environment, custom, resource, lambda, role]]
+      RoleName: !Sub ${ProjectName}-${Environment}-custom-resource-lambda-role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -34,7 +34,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
-        - PolicyName: !Join ["-", [!Ref ProjectName, !Ref Environment, user, pool, policy]]
+        - PolicyName: !Sub ${ProjectName}-${Environment}-user-pool-policy
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -47,7 +47,7 @@ Resources:
   DescribeUserPoolDomainDescriptionFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, aws, describe, user, pool, domain]]
+      FunctionName: !Sub ${ProjectName}-${Environment}-aws-describe-user-pool-domain
       Runtime: nodejs12.x
       Code: .aws/functions/aws-describe-user-pool-domain.zip
       Handler: index.handler
@@ -67,7 +67,7 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Join ["-", [!Ref ProjectName, !Ref Environment, users]]
+      UserPoolName: !Sub ${ProjectName}-${Environment}-users
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -84,7 +84,7 @@ Resources:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
       UserPoolId: !Ref UserPool
-      Domain: !Join [".", [auth, !Ref DomainName]]
+      Domain: !Sub auth.${DomainName}
       CustomDomainConfig:
         CertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${AuthCertificateId}
 
@@ -94,13 +94,13 @@ Resources:
       - DescribeUserPoolDomainDescriptionLogGroup
     Properties:
       ServiceToken: !GetAtt DescribeUserPoolDomainDescriptionFunction.Arn
-      Domain: !Join [".", [auth, !Ref DomainName]]
+      Domain: !Sub auth.${DomainName}
 
   UserPoolDomainRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneName: !Join [".", [!Ref DomainName, ""]]
-      Name: !Join [".", [auth, !Ref DomainName, ""]]
+      HostedZoneName: !Sub ${DomainName}.
+      Name: !Sub auth.${DomainName}.
       Type: A
       AliasTarget:
         DNSName: !GetAtt UserPoolDomainDescription.CloudFrontDistribution
@@ -110,7 +110,7 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       UserPoolId: !Ref UserPool
-      ClientName: !Join ["-", [!Ref ProjectName, client]]
+      ClientName: !Sub ${ProjectName}-client
       GenerateSecret: false
       ExplicitAuthFlows:
         - ALLOW_USER_PASSWORD_AUTH
@@ -129,18 +129,19 @@ Resources:
   HttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
-      Name: !Join ["-", [!Ref ProjectName, !Ref Environment]]
+      Name: !Sub ${ProjectName}-${Environment}
       ProtocolType: HTTP
       CorsConfiguration:
         AllowOrigins:
-          - "*"
+          - !Sub https://app.${DomainName}
         AllowMethods:
-          - POST
-          - GET
-          - PUT
-          - DELETE
+          - "*"
         AllowHeaders:
           - "*"
+        ExposeHeaders:
+          - "*"
+        MaxAge: 0
+        AllowCredentials: false
 
   HttpApiStage:
     Type: AWS::ApiGatewayV2::Stage
@@ -157,21 +158,21 @@ Resources:
   HttpApiLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Join ["/", ["", !Ref ProjectName, !Ref Environment, api]]
+      LogGroupName: !Sub /${ProjectName}/${Environment}/api
       RetentionInDays: 30
 
   HttpApiDomain:
     Type: AWS::ApiGatewayV2::DomainName
     Properties:
-      DomainName: !Join [".", [api, !Ref DomainName]]
+      DomainName: !Sub api.${DomainName}
       DomainNameConfigurations:
         - CertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${ApiCertificateId}
 
   HttpApiDomainRecordSet:
     Type: AWS::Route53::RecordSet
     Properties:
-      HostedZoneName: !Join [".", [!Ref DomainName, ""]]
-      Name: !Join [".", [api, !Ref DomainName, ""]]
+      HostedZoneName: !Sub api.${DomainName}.
+      Name: !Sub api.${DomainName}.
       Type: A
       AliasTarget:
         DNSName: !GetAtt HttpApiDomain.RegionalDomainName
@@ -180,14 +181,14 @@ Resources:
   HttpApiMapping:
     Type: AWS::ApiGatewayV2::ApiMapping
     Properties:
-      DomainName: !Join [".", [api, !Ref DomainName]]
+      DomainName: !Sub api.${DomainName}
       ApiId: !Ref HttpApi
       Stage: !Ref HttpApiStage
 
   CognitoAuthorizer:
     Type: AWS::ApiGatewayV2::Authorizer
     Properties:
-      Name: !Join ["-", [!Ref ProjectName, !Ref Environment, cognito]]
+      Name: !Sub ${Environment}-${Environment}-cognito
       ApiId: !Ref HttpApi
       AuthorizerType: JWT
       IdentitySource:
@@ -202,7 +203,7 @@ Resources:
   NotesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Join ["-", [!Ref ProjectName, !Ref Environment, notes]]
+      TableName: !Sub ${Environment}-${Environment}-notes
       KeySchema:
         - AttributeName: userId
           KeyType: HASH
@@ -222,7 +223,7 @@ Resources:
   LambdaLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
-      LayerName: !Join ["-", [!Ref ProjectName, !Ref Environment]]
+      LayerName: !Sub ${Environment}-${Environment}
       Content: .aws/layers/transadmin.zip
       CompatibleRuntimes:
         - nodejs12.x
@@ -232,7 +233,7 @@ Resources:
   LambdaRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Join ["-", [!Ref ProjectName, !Ref Environment, lambda, role]]
+      RoleName: !Sub ${Environment}-${Environment}-lambda-role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -248,7 +249,7 @@ Resources:
   DynamoDBPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
-      ManagedPolicyName: !Join ["-", [!Ref ProjectName, !Ref Environment, dynamodb, policy]]
+      ManagedPolicyName: !Sub ${Environment}-${Environment}-dynamodb-policy
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -270,7 +271,7 @@ Resources:
   CreateNoteFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, create, note]]
+      FunctionName: !Sub ${ProjectName}-${Environment}-create-note
       Runtime: nodejs12.x
       Code: .aws/functions/create-note.zip
       Handler: index.handler
@@ -297,7 +298,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref HttpApi
-      RouteKey: "POST /notes"
+      RouteKey: POST /notes
       AuthorizationType: NONE
       Target: !Sub integrations/${CreateNoteIntegration}
 
@@ -312,7 +313,7 @@ Resources:
   GetNoteListFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, note, list]]
+      FunctionName: !Sub ${ProjectName}-${Environment}-get-note-list
       Runtime: nodejs12.x
       Code: .aws/functions/get-note-list.zip
       Handler: index.handler
@@ -339,7 +340,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref HttpApi
-      RouteKey: "GET /notes"
+      RouteKey: GET /notes
       AuthorizationType: NONE
       Target: !Sub integrations/${GetNoteListIntegration}
 
@@ -347,6 +348,48 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !Ref GetNoteListFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/${HttpApiStage}/*
+
+  UpdateNoteFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${ProjectName}-${Environment}-update-note
+      Runtime: nodejs12.x
+      Code: .aws/functions/update-note.zip
+      Handler: index.handler
+      Timeout: 10
+      Role: !GetAtt LambdaRole.Arn
+      Layers:
+        - !Ref LambdaLayer
+
+  UpdateNoteLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UpdateNoteFunction}
+      RetentionInDays: 30
+
+  UpdateNoteIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateNoteFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  UpdateNoteRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: GET /notes/{id}
+      AuthorizationType: NONE
+      Target: !Sub integrations/${UpdateNoteIntegration}
+
+  UpdateNotePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref UpdateNoteFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/${HttpApiStage}/*

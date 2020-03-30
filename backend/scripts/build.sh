@@ -18,8 +18,10 @@ find .aws/build -exec touch -t 8510260120 {} +
 
 cd .aws/build
 zip -Xqr ../layers/$npm_package_name.zip nodejs
+# mv ../layers/$npm_package_name.zip ../layers/$(sha256sum ../layers/$npm_package_name.zip | cut -d ' ' -f 1).zip
 for lambda in $(find . -maxdepth 1 -name "*.js" -type f); do
     cp -p $lambda index.js
     zip -Xqr ../functions/$(basename $lambda .js).zip index.js lib
+    # mv ../functions/$(basename $lambda .js).zip ../functions/$(sha256sum ../functions/$(basename $lambda .js).zip | cut -d ' ' -f 1).zip
 done
 rm index.js
