@@ -56,6 +56,12 @@ Resources:
       Layers:
         - !Ref LambdaLayer
 
+  DescribeUserPoolDomainDescriptionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${DescribeUserPoolDomainDescriptionFunction}
+      RetentionInDays: 30
+
   # USER POOL
 
   UserPool:
@@ -84,6 +90,8 @@ Resources:
 
   UserPoolDomainDescription:
     Type: AWS::CloudFormation::CustomResource
+    DependsOn:
+      - DescribeUserPoolDomainDescriptionLogGroup
     Properties:
       ServiceToken: !GetAtt DescribeUserPoolDomainDescriptionFunction.Arn
       Domain: !Join [".", [auth, !Ref DomainName]]
@@ -121,29 +129,60 @@ Resources:
   HttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
-      # Name: !Join ["-", [!Ref ProjectName, !Ref Environment]]
-      BodyS3Location: # .aws/swagger.yaml
-        Bucket: !Join ["-", [!Ref ProjectName, devops]]
-        Key: !Join ["/", [!Ref Environment, swagger.yaml]]
-      FailOnWarnings: false
-      # CorsConfiguration:
-      #   AllowOrigins:
-      #     - "*"
-      #   AllowMethods:
-      #     - POST
-      #     - GET
-      #     - PUT
-      #     - DELETE
-      #   AllowHeaders:
-      #     - "*"
+      Name: !Join ["-", [!Ref ProjectName, !Ref Environment]]
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - POST
+          - GET
+          - PUT
+          - DELETE
+        AllowHeaders:
+          - "*"
 
   HttpApiStage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
       ApiId: !Ref HttpApi
       StageName: $default
+      AutoDeploy: true
       StageVariables:
         NOTES_TABLE: !Ref NotesTable
+      AccessLogSettings:
+        DestinationArn: !GetAtt HttpApiLogs.Arn
+        Format: $context.identity.sourceIp - - [$context.requestTime] "$context.httpMethod $context.routeKey $context.protocol" $context.status $context.responseLength $context.requestId
+
+  HttpApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join ["/", ["", !Ref ProjectName, !Ref Environment, api]]
+      RetentionInDays: 30
+
+  HttpApiDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Join [".", [api, !Ref DomainName]]
+      DomainNameConfigurations:
+        - CertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${ApiCertificateId}
+
+  HttpApiDomainRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Join [".", [!Ref DomainName, ""]]
+      Name: !Join [".", [api, !Ref DomainName, ""]]
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt HttpApiDomain.RegionalDomainName
+        HostedZoneId: !GetAtt HttpApiDomain.RegionalHostedZoneId
+
+  HttpApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Join [".", [api, !Ref DomainName]]
+      ApiId: !Ref HttpApi
+      Stage: !Ref HttpApiStage
 
   CognitoAuthorizer:
     Type: AWS::ApiGatewayV2::Authorizer
@@ -157,6 +196,8 @@ Resources:
         Audience:
           - !Ref UserPoolClient
         Issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}
+
+  # DYNAMODB TABLES
 
   NotesTable:
     Type: AWS::DynamoDB::Table
@@ -176,6 +217,8 @@ Resources:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
 
+  # LAMBDA LAYERS
+
   LambdaLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
@@ -183,6 +226,8 @@ Resources:
       Content: .aws/layers/transadmin.zip
       CompatibleRuntimes:
         - nodejs12.x
+
+  # LAMBDAS ROLE
 
   LambdaRole:
     Type: AWS::IAM::Role
@@ -220,13 +265,7 @@ Resources:
       Roles:
         - !Ref LambdaRole
 
-  LambdaFunctionPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref CreateNoteFunction
-      Action: lambda:InvokeFunction
-      Principal: apigateway.amazonaws.com
-      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}
+  # RESOURCES
 
   CreateNoteFunction:
     Type: AWS::Lambda::Function
@@ -235,9 +274,82 @@ Resources:
       Runtime: nodejs12.x
       Code: .aws/functions/create-note.zip
       Handler: index.handler
+      Timeout: 10
       Role: !GetAtt LambdaRole.Arn
       Layers:
         - !Ref LambdaLayer
+
+  CreateNoteLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${CreateNoteFunction}
+      RetentionInDays: 30
+
+  CreateNoteIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CreateNoteFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  CreateNoteRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "POST /notes"
+      AuthorizationType: NONE
+      Target: !Sub integrations/${CreateNoteIntegration}
+
+  CreateNotePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref CreateNoteFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/${HttpApiStage}/*
+
+  GetNoteListFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Join ["-", [!Ref ProjectName, !Ref Environment, get, note, list]]
+      Runtime: nodejs12.x
+      Code: .aws/functions/get-note-list.zip
+      Handler: index.handler
+      Timeout: 10
+      Role: !GetAtt LambdaRole.Arn
+      Layers:
+        - !Ref LambdaLayer
+
+  GetNoteListLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GetNoteListFunction}
+      RetentionInDays: 30
+
+  GetNoteListIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetNoteListFunction.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  GetNoteListRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /notes"
+      AuthorizationType: NONE
+      Target: !Sub integrations/${GetNoteListIntegration}
+
+  GetNoteListPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref GetNoteListFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/${HttpApiStage}/*
 
 Outputs:
   HttpApi:
