@@ -1,7 +1,6 @@
 #!/bin/bash
 
-mkdir -p .aws/build/nodejs
-mkdir -p .aws/layers .aws/functions
+mkdir -p .aws/build/nodejs .aws/layers .aws/functions
 
 find .aws/build/nodejs -mindepth 1 -delete
 find .aws/layers -mindepth 1 -delete
@@ -9,7 +8,7 @@ find .aws/functions -mindepth 1 -delete
 
 cd .aws/build/nodejs
 cp ../../../package*.json .
-npm install --production
+npm ci --production
 rm package*.json
 cd ../../..
 
@@ -22,6 +21,6 @@ zip -Xqr ../layers/$npm_package_name.zip nodejs
 for lambda in $(find . -maxdepth 1 -name "*.js" -type f); do
     cp -p $lambda index.js
     zip -Xqr ../functions/$(basename $lambda .js).zip index.js lib
+    rm index.js
     # mv ../functions/$(basename $lambda .js).zip ../functions/$(sha256sum ../functions/$(basename $lambda .js).zip | cut -d ' ' -f 1).zip
 done
-rm index.js
