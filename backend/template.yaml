@@ -137,7 +137,7 @@ Resources:
         AllowMethods:
           - "*"
         AllowHeaders:
-          - "*"
+          - Authorization
         ExposeHeaders:
           - "*"
         MaxAge: 0
@@ -215,8 +215,10 @@ Resources:
         - AttributeName: noteId
           AttributeType: S
       ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      SSESpecification:
+        SSEEnabled: true
 
   # LAMBDA LAYERS
 
