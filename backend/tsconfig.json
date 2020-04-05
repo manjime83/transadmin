@@ -3,7 +3,7 @@
     "incremental": true,
     "target": "es2019",
     "module": "commonjs",
-    "lib": ["es2019", "dom"],
+    "lib": ["es2019"],
     "outDir": ".aws/build",
     "declaration": false,
     "strict": true,
