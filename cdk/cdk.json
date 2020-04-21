@@ -1,0 +1,7 @@
+{
+  "app": "ts-node bin/index.ts",
+  "output": ".aws",
+  "pathMetadata": false,
+  "toolkitStackName": "transadmin-devops",
+  "toolkitBucketName": "transadmin-devops"
+}

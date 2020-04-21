@@ -1,0 +1,17 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  ProjectName:
+    Type: String
+  Environment:
+    Type: String
+
+Resources:
+  Repository:
+    Type: AWS::CodeCommit::Repository
+    Properties:
+      RepositoryName: !Sub ${ProjectName}
+
+Outputs:
+  RepositoryUrl:
+    Value: !GetAtt Repository.CloneUrlSsh

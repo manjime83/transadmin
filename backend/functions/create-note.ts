@@ -5,6 +5,11 @@ import * as uuid from "uuid";
 
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
+// type Body {
+//   content: string;
+//   attachment: string;
+// }
+
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent,
   _context: Context

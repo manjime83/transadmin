@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  ProjectName:
+    Type: String
+  Environment:
+    Type: String
+  DomainName:
+    Type: String
+  AuthCertificateId:
+    Type: String
+  ApiCertificateId:
+    Type: String
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, prod]
+
+Resources:
+  DevOps:
+    Type: AWS::CloudFormation::Stack
+    Condition: IsProd
+    Properties:
+      TemplateURL: template-devops.yaml
+      Parameters:
+        ProjectName: !Ref ProjectName
+        Environment: !Ref Environment
+# Outputs:
